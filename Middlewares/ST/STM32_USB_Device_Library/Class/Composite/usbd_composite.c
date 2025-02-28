@@ -353,45 +353,16 @@ static uint8_t  *USBD_COMPOSITE_HID_GetCfgDesc (uint16_t *length)
     uint8_t *USBD_COMPOSITE_HID_NO_DIGITIZER_CfgDesc = 0;
 
     // alter config descriptor depending on number of interfaces
-    if (NumInterfaces <= 1)
-    {
-        /* set reported length */
-        USBD_COMPOSITE_HID_CfgDesc[2] = LOBYTE(USB_COMPOSITE_HID_CONFIG_DESC_SIZE_SINGLE_ITF);  // low byte
-        USBD_COMPOSITE_HID_CfgDesc[3] = HIBYTE(USB_COMPOSITE_HID_CONFIG_DESC_SIZE_SINGLE_ITF);  // high byte
+    // NumDescriptors is ALWAYS 1, so this is not needed
+    /* set reported length */
+    USBD_COMPOSITE_HID_CfgDesc[2] = LOBYTE(USB_COMPOSITE_HID_CONFIG_DESC_SIZE_SINGLE_ITF);  // low byte
+    USBD_COMPOSITE_HID_CfgDesc[3] = HIBYTE(USB_COMPOSITE_HID_CONFIG_DESC_SIZE_SINGLE_ITF);  // high byte
 
-        /* set number of reported interfaces */
-        USBD_COMPOSITE_HID_CfgDesc[4] = 1U;
+    /* set number of reported interfaces */
+    USBD_COMPOSITE_HID_CfgDesc[4] = 1U;
 
-        *length = USB_COMPOSITE_HID_CONFIG_DESC_SIZE_SINGLE_ITF;
-        return USBD_COMPOSITE_HID_CfgDesc;
-    }
-    else if(NumInterfaces <= 2)
-    {
-        /* set reported length */
-        USBD_COMPOSITE_HID_CfgDesc[2] = LOBYTE(USB_COMPOSITE_HID_CONFIG_NO_DIGITIZER_DESC_SIZE);  // low byte
-        USBD_COMPOSITE_HID_CfgDesc[3] = HIBYTE(USB_COMPOSITE_HID_CONFIG_NO_DIGITIZER_DESC_SIZE);  // high byte
-
-        /* set number of reported interfaces */
-        USBD_COMPOSITE_HID_CfgDesc[4] = USBD_GENERIC_AND_PRESS_INTERFACES_ONLY;
-
-        /* set pointer to start of config descriptor */
-        USBD_COMPOSITE_HID_NO_DIGITIZER_CfgDesc = USBD_COMPOSITE_HID_CfgDesc;
-
-        *length = USB_COMPOSITE_HID_CONFIG_NO_DIGITIZER_DESC_SIZE;
-        return USBD_COMPOSITE_HID_NO_DIGITIZER_CfgDesc;
-    }
-    else
-    {
-        /* change reported length */
-        USBD_COMPOSITE_HID_CfgDesc[2] = LOBYTE(USB_COMPOSITE_HID_CONFIG_DESC_SIZE);  // low byte
-        USBD_COMPOSITE_HID_CfgDesc[3] = HIBYTE(USB_COMPOSITE_HID_CONFIG_DESC_SIZE);  // high byte
-
-        /* set number of reported interfaces */
-        USBD_COMPOSITE_HID_CfgDesc[4] = USBD_MAX_NUM_INTERFACES;
-
-        *length = sizeof (USBD_COMPOSITE_HID_CfgDesc);
-        return USBD_COMPOSITE_HID_CfgDesc;
-    }
+    *length = USB_COMPOSITE_HID_CONFIG_DESC_SIZE_SINGLE_ITF;
+    return USBD_COMPOSITE_HID_CfgDesc;
 }
 
 /**
