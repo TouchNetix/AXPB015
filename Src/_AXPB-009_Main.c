@@ -75,6 +75,8 @@ void MoveCircularBuffer(uint8_t operation);
   */
 int main(void)
 {
+    int numsent = 0;
+    int max_continuous_reports = 5;
     // initialise device: peripherals, clocks, GPIO pins, USB, timers etc.
     Device_Init();
 
@@ -188,8 +190,10 @@ int main(void)
          * (like they used to be)
          * e.g. Press endpoint always sends packets and will be a hog until the host has received it, which Linux won't without an application running
          * Instead, each endpoint needs an independent check that blocks a new packet from being sent if one is in process, but doesn't prevent other endpoints
-         * from sending */
-        if((boGenericReportToSend == 1) && (USBD_GENERIC_HID_GetState(&hUsbDeviceFS) == USB_HID_IDLE) && (usb_remote_wake_state == RESUMED))
+         * from sending 
+         * send at most 5 reports before waiting for 
+         * */
+        if((boGenericReportToSend == 1) && (USBD_GENERIC_HID_GetState(&hUsbDeviceFS) == USB_HID_IDLE) && (usb_remote_wake_state == RESUMED) && numsent < max_continuous_reports)
         {
             Send_USB_Report(GENERIC, &hUsbDeviceFS, aXiom_Rx_Buffer[CircularBufferTail], USBD_GENERIC_HID_REPORT_IN_SIZE);
             MoveCircularBuffer(EMPTIED_BUFFER);
@@ -198,18 +202,29 @@ int main(void)
             {
                 boGenericReportToSend = 0;
             }
+            numsent++;
         }
 
         if((boMouseReportToSend == 1) && (USBD_GENERIC_HID_GetState(&hUsbDeviceFS) == USB_HID_IDLE) && (usb_remote_wake_state == RESUMED))
         {
             Send_USB_Report(MOUSE, &hUsbDeviceFS, usb_hid_mouse_report_in, byMouseReportLength);
             boMouseReportToSend = 0;
-        }
+            // we successfully sent a report so reset the counter.
+            numsent = 0;
+        } 
 
         if((boPressReportToSend == 1) && (USBD_PRESS_HID_GetState(&hUsbDeviceFS) == USB_HID_IDLE) && (usb_remote_wake_state == RESUMED))
         {
             Send_USB_Report(PRESS, &hUsbDeviceFS, usb_hid_press_report_in, USBD_PRESS_HID_REPORT_IN_SIZE);
             boPressReportToSend = 0;
+            // we successfully sent a report so reset the counter.
+            numsent = 0;
+        }
+
+        if((USBD_GENERIC_HID_GetState(&hUsbDeviceFS) == USB_HID_IDLE))
+        {
+            // we *could* send a report but we don't want to, so reset the counter
+            numsent = 0;
         }
 
         // turns off the LEDs if a recent comms event has turned them on
