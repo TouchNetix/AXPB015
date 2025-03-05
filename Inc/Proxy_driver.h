@@ -38,9 +38,9 @@
 #include "usbd_conf.h"
 
 /*============ Defines ============*/
-#define NUMBYTES_RX_MP      (58)
+#define NUMBYTES_RX_MP      (57)
 #define NUMPROXYBYTES_TX     (4)
-#define NUMPROXYBYTES_RX    (64)
+#define NUMPROXYBYTES_RX    (63)
 
 /*============ Exported Variables ============*/
 extern volatile bool    boProxyReportAvailable;
