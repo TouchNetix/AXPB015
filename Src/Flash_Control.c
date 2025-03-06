@@ -264,7 +264,6 @@ uint8_t GetDeviceModeFromFlash(void)
         Store_BridgeMode_To_Flash(MODE_PARALLEL_DIGITIZER);
     }
 
-    // return MODE_PARALLEL_DIGITIZER;
     return BridgeMode_temp;
 }
 
