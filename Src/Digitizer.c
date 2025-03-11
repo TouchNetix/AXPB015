@@ -45,6 +45,7 @@
 #include "Press_driver.h"
 #include "Usage_Builder.h"
 #include "Mode_Control.h"
+#include "usbd_generic_if.h"
 
 /*============ Defines ============*/
 #define U41_REPORT              (0x41)
@@ -124,7 +125,7 @@ uint8_t  byNumTouches                                       =  0;
 uint8_t  touch_data[5][8]                                   = {0};
 uint8_t  usb_remote_wake_state                              =  RESUMED;
 bool     boUSBTimeoutEnabled                                =  0;
-bool     boMouseEnabled                                     =  1;       // starts with digitizer enable (TH2 doesn't know the command to toggle it!)
+bool     boMouseEnabled                                     =  true;       // starts with digitizer enable (TH2 doesn't know the command to toggle it!)
 uint8_t  wakeup_option                                      =  0;
 
 /*============ Local Function Prototypes ============*/
@@ -200,15 +201,19 @@ static void PrepareAbsMouseReport(void)
     TempX = DigitizerXCoord >> 4;
     TempY = DigitizerYCoord >> 4;
 
-    usb_hid_mouse_report_in[0] = (0xF8 | button_state);
+    uint16_t idx = 0;
+#if COMBINED_REPORT
+    usb_hid_mouse_report_in[idx++] = REPORT_ID_MOUSE;
+#endif
+    usb_hid_mouse_report_in[idx++] = (0xF8 | button_state);
 
     // send x coordinates
-    usb_hid_mouse_report_in[1] = TempX & 0xFF;
-    usb_hid_mouse_report_in[2] = TempX >> 8;
+    usb_hid_mouse_report_in[idx++] = TempX & 0xFF;
+    usb_hid_mouse_report_in[idx++] = TempX >> 8;
 
     // then send y coordinates
-    usb_hid_mouse_report_in[3] = TempY & 0xFF;
-    usb_hid_mouse_report_in[4] = TempY >> 8;
+    usb_hid_mouse_report_in[idx++] = TempY & 0xFF;
+    usb_hid_mouse_report_in[idx++] = TempY >> 8;
 
     boMouseReportToSend = 1;
 }
@@ -359,7 +364,7 @@ void MultiPointDigitizer(void)
         }
         else // if(usb_remote_wake_state == RESUMED)
         {
-            usb_hid_mouse_report_in[0] = 1; //report number --> relates to the report number found in the report descriptor (allows windows to differentiate between different connected devices)
+            usb_hid_mouse_report_in[0] = REPORT_ID_DIGITIZER; //report number --> relates to the report number found in the report descriptor (allows windows to differentiate between different connected devices)
 
             for(byTouchNum = 1u; byTouchNum <= MAX_NUM_CONTACTS; byTouchNum++) // perform same processing for each touch
             {

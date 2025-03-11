@@ -185,9 +185,9 @@ void ProcessTBPCommand()
     bool boRespondNow = 1;   // indicates the host is waiting for some sort of reply (normally status) - Unless specified, all commands send a response
 
     // if proxy mode is active and command comes via control endpoint, normally means host wants bridge to stop proxy so clear bit and de-init the interrupt line
-    if(target_interface == GENERIC_INTERFACE_NUM)
+    if((target_interface == GENERIC_INTERFACE_NUM) && (pTBPCommandReportGeneric[0] == REPORT_ID_CONTROL))
     {
-        pTBPCommandReport = pTBPCommandReportGeneric;
+        pTBPCommandReport = &pTBPCommandReportGeneric[1]; // Index 0 contains the report ID.
 
         // clear all proxy flags --> makes sure the process doesn't start halfway through next time
         boInternalProxy = 0;
@@ -282,7 +282,7 @@ void ProcessTBPCommand()
             wdProxyMP_BytesRead = 0;    //variable keeps track of how many bytes in we are
 
             /* These are copied after sending the semaphore (above) so we can re-use the same buffer */
-            aXiom_NumBytesRx = (ProxyMP_TotalNumBytesRx <= NUMBYTES_RX_MP) ? ProxyMP_TotalNumBytesRx : (64 - 3 - 2 - 1);  // set read size to 58 (or no. requested bytes if less than endpoint size for whatever reason)
+            aXiom_NumBytesRx = (ProxyMP_TotalNumBytesRx <= NUMBYTES_RX_MP) ? ProxyMP_TotalNumBytesRx : NUMBYTES_RX_MP;  // set read size to 58 (or no. requested bytes if less than endpoint size for whatever reason)
                                                                                                             // -3 ('nonsense' bytes at end) -2 (header) -1(??)
             aXiom_Tx_Buffer[0] = (uint8_t)(wdProxyMP_AddrStart & 0xFF);    // page address lobyte
             aXiom_Tx_Buffer[1] = (wdProxyMP_AddrStart >> 8);   // page address hibyte
