@@ -38,7 +38,7 @@
 #include "usbd_conf.h"
 
 /*============ Defines ============*/
-#define NUMBYTES_RX_MP      (57)
+#define NUMBYTES_RX_MP      (56)
 #define NUMPROXYBYTES_TX     (4)
 #define NUMPROXYBYTES_RX    (63)
 
